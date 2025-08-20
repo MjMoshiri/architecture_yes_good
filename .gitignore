@@ -1,0 +1,10 @@
+# Local database
+chroma_db/
+
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env

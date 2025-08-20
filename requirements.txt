@@ -1,0 +1,5 @@
+chromadb
+google-generativeai
+PyYAML
+rich
+python-dotenv
