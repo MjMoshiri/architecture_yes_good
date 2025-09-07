@@ -85,7 +85,7 @@ While reliable, the dependency on Zookeeper added significant operational comple
 
 ### The Rise of KRaft
 
-Starting in version 2.8 and becoming production-ready in version 3.3, Kafka introduced **Kafka Raft Metadata mode (KRaft)**. KRaft is a consensus protocol based on the Raft algorithm that allows Kafka to manage its own metadata without an external dependency on Zookeeper.
+Starting in version 2.8 and becoming production-ready in version 3.3, Kafka introduced **Kafka Raft Metadata mode (KRaft)**. KRaft is a consensus protocol based on the [Raft algorithm](../concepts/distributed-systems/raft.md) that allows Kafka to manage its own metadata without an external dependency on Zookeeper.
 
 -   **Simplified Architecture:** With KRaft, the cluster metadata is no longer stored in Zookeeper but in a dedicated internal topic within Kafka itself.
 -   **Controller Quorum:** A subset of brokers are designated as "controllers," and they use the KRaft protocol to elect a leader among themselves. This leader is responsible for managing the cluster's metadata.
