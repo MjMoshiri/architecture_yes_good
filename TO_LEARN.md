@@ -15,4 +15,6 @@ This file tracks concepts and topics that have emerged during our discussions an
 | Hadoop | [`netflix-kafka.md`](./case-studies/netflix-kafka.md) | |
 | Mantis | [`netflix-kafka.md`](./case-studies/netflix-kafka.md) | |
 | Spark | [`netflix-kafka.md`](./case-studies/netflix-kafka.md) | |
-| CQRS | [`netflix-kafka.md`](./case-studies/netflix-kafka.md) | |
+| Delta-of-Delta Compression | [`time-series-databases.md`](./concepts/databases/time-series-databases.md) | Time-series encoding that compresses numeric streams by storing differences of differences. |
+| Run-Length Encoding | [`time-series-databases.md`](./concepts/databases/time-series-databases.md) | Technique for compressing repeated values within time buckets. |
+| Gorilla Compression | [`time-series-databases.md`](./concepts/databases/time-series-databases.md) | Facebook metric format combining XOR and adaptive encoding for doubles. |
