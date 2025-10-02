@@ -1,6 +1,6 @@
 # Knowledge Base Guide
 
-This repository is a structured knowledge base for software architecture topics. The goal is to maintain a consistent and machine-readable format that can be indexed by a local vector database for semantic search.
+This repository is a structured knowledge base for software learnings across architecture, infrastructure, programming, security, and more. The goal is to maintain a consistent and machine-readable format that can be indexed by a local vector database for semantic search.
 
 ## Philosophy
 
@@ -10,11 +10,12 @@ This repository is a structured knowledge base for software architecture topics.
 
 ## Directory & File Structure
 
-The repository is organized into three main categories:
+The repository is organized into several categories:
 
 -   `/concepts`: Foundational ideas and patterns (e.g., CAP Theorem, Sharding, Pub/Sub).
 -   `/products`: Specific technologies and tools (e.g., PostgreSQL, RabbitMQ, Docker).
--   `/systems`: Case studies and designs of large-scale systems (e.g., Twitter's Feed, TinyURL).
+-   `/case-studies`: Analyses and designs of real-world systems (e.g., Netflix Keystone).
+-   `/paths`: Learning roadmaps and certification study guides (e.g., CompTIA Security+).
 
 ### File Naming Convention
 
@@ -51,7 +52,7 @@ A Python script, `knowledge_base.py`, is used to manage the vector database.
 The process is designed to be simple. You provide the topic, and the AI agent handles the organization.
 
 1.  **State your intent:** "I want to learn about [Topic Name]."
-2.  **AI Determines Location:** The agent will analyze the topic and decide the most logical category (`concepts`, `products`, or `systems`) and sub-folder.
+2.  **AI Determines Location:** The agent will analyze the topic and decide the most logical category (`concepts`, `products`, `case-studies`, or `paths`) and sub-folder.
 3.  **AI Creates Structure:** If a suitable sub-folder exists, the new topic file will be placed there. If not, a new, appropriately named sub-folder will be created first.
 4.  **AI Confirms Action:** The agent will confirm the file's location (e.g., "I have created the file at `products/databases/cassandra.md`").
 5.  **Content Creation:** You provide the content for the new file.
