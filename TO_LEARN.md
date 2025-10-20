@@ -9,7 +9,11 @@ This file tracks concepts and topics that have emerged during our discussions an
 
 | Topic | Source | Notes |
 | :--- | :--- | :--- |
-
+| Saga Pattern | [`two-phase-commit.md`](./concepts/distributed-systems/two-phase-commit.md) | Manages data consistency across microservices in distributed systems. |
+| Idempotency | Suggested | Ensures repeated API requests do not result in duplicate transactions. |
+| ISO 8583 | Suggested | International standard for financial transaction card messages. |
+| Payment Tokenization | Suggested | Replaces sensitive card data with a non-sensitive equivalent token. |
+| Strangler Fig Pattern | Suggested | Strategy for incrementally migrating legacy systems to modern architectures. |
 | Zero-Copy | [`kafka.md`](./products/kafka.md) | Key performance optimization in Kafka's log architecture. |
 | Sequential vs. Random I/O | [`kafka.md`](./products/kafka.md) | Explains Kafka's high write throughput. |
 | Hadoop | [`netflix-kafka.md`](./case-studies/netflix-kafka.md) | |
