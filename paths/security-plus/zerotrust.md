@@ -52,3 +52,4 @@ last_updated: "2025-10-24"
 - **Policy Decision Point (PDP)**: The control plane component that makes the access decision. Also known as the Policy Engine.
 - **Policy Enforcement Point (PEP)**: The data plane component that enforces the policy (e.g., a gateway, proxy, or agent).
 - **Policy Administrator (PA)**: The component responsible for creating and managing security policies.
+- **Policy Engine (PE)**: The component that evaluates policies and makes decisions about whether to allow or deny access.
