@@ -2,43 +2,49 @@
 title: "Zero Trust Security Model"
 tags: ["security", "zero-trust", "networking"]
 prerequisites: []
-status: "stub"
+status: "learning"
 last_updated: "2025-10-24"
 ---
+
+## Summary
+
+Zero Trust rejects the idea of a trusted internal network perimeter. Every request is treated as hostile until it is explicitly authenticated, authorized, and encrypted. Following NIST SP 800-207, a Zero Trust program blends continuous verification, per-session access decisions, segmentation, least privilege, and automated response to limit the blast radius of any breach.
 
 ## Core Principles
 
 ### No Implicit Trust Zone
-- **Description**: Assumes no user or device is trusted by default, regardless of its location on the network (internal or external). Every access request must be authenticated and authorized.
-- **Key Takeaway**: The network perimeter is dead. Trust is earned, not given.
+- **Description**: Neither users nor devices are trusted by default, no matter whether they originate from inside or outside the corporate network.
+- **Key Takeaway**: The perimeter model is obsolete—trust must be earned for every interaction.
 
 ### No Ownership Assumption
-- **Description**: Assumes that the organization does not own the network or the devices connecting to it. This is critical in BYOD (Bring Your Own Device) and cloud environments.
-- **Key Takeaway**: Secure the data and the access to it, not the pipes or the endpoints.
+- **Description**: Operate as if the organization does not own the connecting network or device, a realistic stance in BYOD and cloud contexts.
+- **Key Takeaway**: Secure data and access paths rather than relying on presumed-safe infrastructure.
 
 ### Insecure Connections
-- **Description**: All network traffic is assumed to be insecure and potentially hostile. All connections must be encrypted, authenticated, and monitored.
-- **Key Takeaway**: Encrypt everything, everywhere.
+- **Description**: Treat all network traffic as potentially hostile, requiring encryption, authentication, and continuous monitoring.
+- **Key Takeaway**: Encrypt everything, everywhere, and instrument visibility.
 
 ### Consistent Security Policies
-- **Description**: Security policies are applied consistently across all environments (on-prem, cloud, hybrid) and for all users and devices.
-- **Key Takeaway**: Policy enforcement should be centralized and dynamic, not siloed and static.
+- **Description**: Apply policies uniformly across on-prem, cloud, and hybrid environments for every identity and device.
+- **Key Takeaway**: Centralized, dynamic controls prevent policy drift and coverage gaps.
 
----
+## Framework for Zero Trust
 
-## Continuous Verification
+### Continuous Verification
+- **Practice**: Always verify access, all the time, for every resource request—no implicit trust remains after initial login.
+- **Implications**: Enforce strong identity, device posture checks, and context-aware authentication for each transaction.
 
 ### Access Limitation
-- **Description**: Follows the principle of least privilege. Users and devices are granted the minimum level of access required to perform their tasks.
-- **Key Takeaway**: Just-in-time and just-enough access.
+- **Practice**: Grant access to individual enterprise resources on a per-session basis, scoped to the requested task.
+- **Implications**: Apply least privilege, enforce short-lived tokens, and require reauthorization when context changes.
 
 ### Limit the Blast Radius
-- **Description**: Micro-segmentation is used to create small, isolated network zones. If one segment is breached, the damage is contained.
-- **Key Takeaway**: Isolate workloads and resources to prevent lateral movement.
+- **Practice**: Minimize impact if internal or external resources are breached through segmentation and least privilege.
+- **Implications**: Design microsegments, monitor east-west traffic, and ensure workloads default to deny inter-segment communication.
 
 ### Automate
-- **Description**: Automation is used for policy enforcement, threat detection, and incident response to ensure consistency and speed.
-- **Key Takeaway**: Manual security is not scalable.
+- **Practice**: Automate context collection and response across credentials, workloads, endpoints, SIEMs, and threat intelligence feeds.
+- **Implications**: Use orchestration tooling to codify policy evaluation, trigger incident playbooks, and keep pace with attacker velocity.
 
 ---
 
