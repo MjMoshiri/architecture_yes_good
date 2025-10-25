@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import MobileLayout from '@/components/layout/MobileLayout'
 
 export default function TerminalPage() {
@@ -16,18 +16,43 @@ export default function TerminalPage() {
   const [isExistingSession, setIsExistingSession] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
+  const startTerminalSession = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const response = await fetch('/api/terminal/start', {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to start terminal session')
+      }
+
+      setTerminalUrl(data.url)
+      setSessionInfo(data)
+      setIsExistingSession(data.isExistingSession || false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     const checkTtydAndStartSession = async () => {
       try {
         const checkResponse = await fetch('/api/terminal/check')
         const checkData = await checkResponse.json()
-        
+
         if (!checkData.ttydAvailable) {
           setError(`ttyd is not installed. Please install it first:\n\n${JSON.stringify(checkData.installInstructions, null, 2)}`)
           setIsLoading(false)
           return
         }
-        
+
         // ttyd is available, start the session
         startTerminalSession()
       } catch {
@@ -38,7 +63,7 @@ export default function TerminalPage() {
 
     // Check ttyd availability first, then start terminal session
     checkTtydAndStartSession()
-    
+
     // Handle page visibility changes to maintain session
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && !terminalUrl) {
@@ -48,56 +73,19 @@ export default function TerminalPage() {
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    
+
     // Cleanup on unmount - but don't terminate the session, just disconnect
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       // Don't call stopTerminalSession here to keep session alive
     }
-  }, [])
+  }, [terminalUrl, startTerminalSession])
 
 
 
-  const startTerminalSession = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/terminal/start', {
-        method: 'POST',
-      })
-      
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to start terminal session')
-      }
-      
-      setTerminalUrl(data.url)
-      setSessionInfo(data)
-      setIsExistingSession(data.isExistingSession || false)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
-  const stopTerminalSession = async () => {
-    try {
-      await fetch('/api/terminal/stop', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId: sessionInfo?.sessionId,
-        }),
-      })
-    } catch (err) {
-      console.error('Failed to stop terminal session:', err)
-    }
-  }
+
+
 
   const restartTerminal = () => {
     setTerminalUrl(null)
@@ -197,7 +185,7 @@ export default function TerminalPage() {
             ref={iframeRef}
             src={terminalUrl}
             className="flex-1 w-full border-0"
-            style={{ 
+            style={{
               background: 'black',
               colorScheme: 'dark'
             }}

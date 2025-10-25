@@ -64,7 +64,7 @@ class TerminalSessionManager {
       userIp,
       port,
       process: null,
-      workingDirectory: process.cwd(),
+      workingDirectory: path.join(process.cwd(), '..'),
       createdAt: new Date(),
       lastAccessed: new Date(),
       isActive: false
@@ -126,21 +126,21 @@ class TerminalSessionManager {
         }
       })
 
-      ttydProcess.stdout?.on('data', (data) => {
+      ttydProcess.stdout?.on('data', (data: Buffer) => {
         console.log(`ttyd[${session.port}]:`, data.toString())
       })
 
-      ttydProcess.stderr?.on('data', (data) => {
+      ttydProcess.stderr?.on('data', (data: Buffer) => {
         console.error(`ttyd[${session.port}] error:`, data.toString())
       })
 
-      ttydProcess.on('error', (error) => {
+      ttydProcess.on('error', (error: Error) => {
         console.error(`Failed to start ttyd for session ${session.id}:`, error)
         session.isActive = false
         reject(error)
       })
 
-      ttydProcess.on('exit', (code) => {
+      ttydProcess.on('exit', (code: number | null) => {
         console.log(`ttyd process for session ${session.id} exited with code ${code}`)
         session.isActive = false
         session.process = null
