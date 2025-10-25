@@ -1,36 +1,35 @@
 import { NextResponse } from 'next/server'
-import { spawn, ChildProcess } from 'child_process'
-import path from 'path'
+import { terminalSessionManager } from '@/lib/terminalSessionManager'
 
-// Store the ttyd process globally (in production, you'd want to use a proper session store)
-let ttydProcess: ChildProcess | null = null
-let terminalPort: number | null = null
-
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    // Use the existing ttyd service running on port 7683
-    const port = 7683
-    terminalPort = port
+    // Get client IP for session management
+    const forwarded = request.headers.get('x-forwarded-for')
+    const clientIp = forwarded ? forwarded.split(',')[0] : '127.0.0.1'
 
-    // Check if ttyd is running on the expected port
-    const isRunning = await checkTtydRunning(port)
-    if (!isRunning) {
+    // Get or create a persistent session for this user
+    const session = await terminalSessionManager.getOrCreateSession(clientIp)
+    
+    if (!session.isActive) {
       return NextResponse.json(
         { 
-          error: 'ttyd service not running. Please start ttyd on port 7683.',
-          details: 'Run: ttyd -i 0.0.0.0 -p 7683 -W bash'
+          error: 'Failed to create terminal session',
+          details: 'ttyd process could not be started'
         },
         { status: 500 }
       )
     }
 
-    // Get the server's network address for Tailscale access
+    // Get the server's network address for access
     const serverHost = process.env.SERVER_HOST || 'localhost'
-    const terminalUrl = `http://${serverHost}:${port}`
+    const terminalUrl = `http://${serverHost}:${session.port}`
     
     return NextResponse.json({
       url: terminalUrl,
-      port: port
+      port: session.port,
+      sessionId: session.id,
+      workingDirectory: session.workingDirectory,
+      isExistingSession: session.lastAccessed.getTime() < Date.now() - 5000 // Consider existing if older than 5 seconds
     })
 
   } catch (error) {
@@ -45,52 +44,3 @@ export async function POST() {
   }
 }
 
-async function checkTtydRunning(port: number): Promise<boolean> {
-  const net = require('net')
-  
-  return new Promise((resolve) => {
-    const socket = new net.Socket()
-    
-    socket.setTimeout(2000)
-    
-    socket.on('connect', () => {
-      socket.destroy()
-      resolve(true)
-    })
-    
-    socket.on('timeout', () => {
-      socket.destroy()
-      resolve(false)
-    })
-    
-    socket.on('error', () => {
-      resolve(false)
-    })
-    
-    socket.connect(port, '127.0.0.1')
-  })
-}
-
-async function findAvailablePort(startPort: number): Promise<number> {
-  const net = require('net')
-  
-  return new Promise((resolve, reject) => {
-    const server = net.createServer()
-    
-    server.listen(startPort, '127.0.0.1', () => {
-      const port = server.address()?.port
-      server.close(() => {
-        resolve(port || startPort)
-      })
-    })
-    
-    server.on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        // Port is in use, try the next one
-        resolve(findAvailablePort(startPort + 1))
-      } else {
-        reject(err)
-      }
-    })
-  })
-}

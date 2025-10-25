@@ -1,18 +1,28 @@
 import { NextResponse } from 'next/server'
+import { terminalSessionManager } from '@/lib/terminalSessionManager'
 
-// Import the ttyd process from the start route
-// In a real application, you'd use a proper session store
-declare global {
-  var ttydProcess: any
-}
-
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    // Access the global ttyd process (this is a simple approach for demo)
-    // In production, you'd want to use a proper process manager
-    if (global.ttydProcess) {
-      global.ttydProcess.kill('SIGTERM')
-      global.ttydProcess = null
+    const body = await request.json().catch(() => ({}))
+    const { sessionId, terminateAll } = body
+
+    if (terminateAll) {
+      // Get client IP and terminate all sessions for this user
+      const forwarded = request.headers.get('x-forwarded-for')
+      const clientIp = forwarded ? forwarded.split(',')[0] : '127.0.0.1'
+      
+      const userSessions = terminalSessionManager.getSessionsByIp(clientIp)
+      for (const session of userSessions) {
+        await terminalSessionManager.terminateSession(session.id)
+      }
+    } else if (sessionId) {
+      // Terminate specific session
+      await terminalSessionManager.terminateSession(sessionId)
+    } else {
+      return NextResponse.json(
+        { error: 'No sessionId provided and terminateAll not specified' },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json({ success: true })

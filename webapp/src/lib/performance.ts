@@ -64,7 +64,8 @@ export function checkRateLimit(
   const windowStart = now - windowMs
   
   // Clean up old entries
-  for (const [key, data] of requestCounts.entries()) {
+  const entries = Array.from(requestCounts.entries())
+  for (const [key, data] of entries) {
     if (data.resetTime < windowStart) {
       requestCounts.delete(key)
     }

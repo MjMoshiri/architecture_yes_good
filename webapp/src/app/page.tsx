@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import MobileLayout from '@/components/layout/MobileLayout'
 
 const TerminalTab = dynamic(() => import('@/components/tabs/TerminalTab'), {
   ssr: false,

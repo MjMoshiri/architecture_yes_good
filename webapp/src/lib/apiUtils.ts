@@ -16,9 +16,15 @@ export function createErrorResponse(
 ): NextResponse<ApiError> {
   const errorResponse: ApiError = {
     error,
-    message,
-    ...(code && { code }),
-    ...(details && { details })
+    message
+  }
+  
+  if (code) {
+    errorResponse.code = code
+  }
+  
+  if (details) {
+    errorResponse.details = details
   }
   
   return NextResponse.json(errorResponse, { status })

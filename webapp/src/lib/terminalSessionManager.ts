@@ -58,7 +58,7 @@ class TerminalSessionManager {
   private async createNewSession(userIp: string): Promise<TerminalSession> {
     const sessionId = this.generateSessionId()
     const port = await this.findAvailablePort()
-    
+
     const session: TerminalSession = {
       id: sessionId,
       userIp,
@@ -75,16 +75,16 @@ class TerminalSessionManager {
 
     // Store session
     this.sessions.set(sessionId, session)
-    
+
     const userSessions = this.sessionsByIp.get(userIp) || []
     userSessions.push(sessionId)
-    
+
     // Limit sessions per IP
     if (userSessions.length > this.MAX_SESSIONS_PER_IP) {
       const oldestSessionId = userSessions.shift()!
       await this.terminateSession(oldestSessionId)
     }
-    
+
     this.sessionsByIp.set(userIp, userSessions)
     await this.saveSessions()
 
@@ -95,13 +95,17 @@ class TerminalSessionManager {
     return new Promise((resolve, reject) => {
       // Create session-specific working directory if it doesn't exist
       const sessionDir = path.join(process.cwd(), '.terminal-sessions', session.id)
-      
+
       try {
-        require('fs').mkdirSync(sessionDir, { recursive: true })
-      } catch (err) {
+        import('fs').then(fs => fs.mkdirSync(sessionDir, { recursive: true }))
+      } catch {
         // Directory might already exist
       }
 
+      // Create a persistent tmux session name
+      const tmuxSessionName = `terminal_${session.id.slice(-8)}`
+
+      // Create or attach to tmux session
       const ttydArgs = [
         '-i', '0.0.0.0',
         '-p', session.port.toString(),
@@ -109,7 +113,7 @@ class TerminalSessionManager {
         '-t', 'titleFixed=Terminal Session',
         '-t', `fontSize=14`,
         '-t', 'theme={"background": "#1a1a1a", "foreground": "#ffffff"}',
-        'bash'
+        'bash', '-c', `tmux new-session -d -s ${tmuxSessionName} 2>/dev/null || true; tmux attach-session -t ${tmuxSessionName}`
       ]
 
       const ttydProcess = spawn('ttyd', ttydArgs, {
@@ -157,49 +161,49 @@ class TerminalSessionManager {
   }
 
   private async findAvailablePort(): Promise<number> {
-    const net = require('net')
-    
+    const net = await import('net')
+
     for (let port = this.BASE_PORT; port < this.BASE_PORT + 100; port++) {
       const isAvailable = await new Promise<boolean>((resolve) => {
         const server = net.createServer()
-        
+
         server.listen(port, '127.0.0.1', () => {
           server.close(() => resolve(true))
         })
-        
+
         server.on('error', () => resolve(false))
       })
-      
+
       if (isAvailable) {
         return port
       }
     }
-    
+
     throw new Error('No available ports found')
   }
 
   private async checkPortActive(port: number): Promise<boolean> {
-    const net = require('net')
-    
+    const net = await import('net')
+
     return new Promise((resolve) => {
       const socket = new net.Socket()
-      
+
       socket.setTimeout(1000)
-      
+
       socket.on('connect', () => {
         socket.destroy()
         resolve(true)
       })
-      
+
       socket.on('timeout', () => {
         socket.destroy()
         resolve(false)
       })
-      
+
       socket.on('error', () => {
         resolve(false)
       })
-      
+
       socket.connect(port, '127.0.0.1')
     })
   }
@@ -208,13 +212,21 @@ class TerminalSessionManager {
     const session = this.sessions.get(sessionId)
     if (!session) return
 
+    // Kill tmux session
+    const tmuxSessionName = `terminal_${sessionId.slice(-8)}`
+    try {
+      spawn('tmux', ['kill-session', '-t', tmuxSessionName], { stdio: 'ignore' })
+    } catch {
+      // Ignore errors if tmux session doesn't exist
+    }
+
     if (session.process) {
       session.process.kill('SIGTERM')
       session.process = null
     }
 
     session.isActive = false
-    
+
     // Remove from IP mapping
     const userSessions = this.sessionsByIp.get(session.userIp) || []
     const index = userSessions.indexOf(sessionId)
@@ -241,7 +253,7 @@ class TerminalSessionManager {
     const now = new Date()
     const expiredSessions: string[] = []
 
-    for (const [sessionId, session] of this.sessions) {
+    for (const [sessionId, session] of Array.from(this.sessions.entries())) {
       const timeSinceLastAccess = now.getTime() - session.lastAccessed.getTime()
       if (timeSinceLastAccess > this.SESSION_TIMEOUT) {
         expiredSessions.push(sessionId)
@@ -307,12 +319,12 @@ class TerminalSessionManager {
         }
 
         this.sessions.set(session.id, session)
-        
+
         const userSessions = this.sessionsByIp.get(session.userIp) || []
         userSessions.push(session.id)
         this.sessionsByIp.set(session.userIp, userSessions)
       }
-    } catch (error) {
+    } catch {
       // File doesn't exist or is invalid, start fresh
       console.log('No existing sessions file found, starting fresh')
     }

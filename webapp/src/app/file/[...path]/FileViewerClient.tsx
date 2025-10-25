@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import MobileLayout from '@/components/layout/MobileLayout'
 import MarkdownViewer from '@/components/content/MarkdownViewer'
 import MetadataDisplay from '@/components/content/MetadataDisplay'
 import MarkdownEditor from '@/components/content/MarkdownEditor'

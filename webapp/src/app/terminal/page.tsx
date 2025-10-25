@@ -7,40 +7,56 @@ export default function TerminalPage() {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [sessionInfo, setSessionInfo] = useState<any>(null)
+  const [sessionInfo, setSessionInfo] = useState<{
+    port: number;
+    workingDirectory: string;
+    sessionId: string;
+    isExistingSession?: boolean;
+  } | null>(null)
   const [isExistingSession, setIsExistingSession] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
-    // Check ttyd availability first, then start terminal session
-    checkTtydAndStart()
-    
-    // Cleanup on unmount
-    return () => {
-      if (terminalUrl) {
-        stopTerminalSession()
+    const checkTtydAndStartSession = async () => {
+      try {
+        const checkResponse = await fetch('/api/terminal/check')
+        const checkData = await checkResponse.json()
+        
+        if (!checkData.ttydAvailable) {
+          setError(`ttyd is not installed. Please install it first:\n\n${JSON.stringify(checkData.installInstructions, null, 2)}`)
+          setIsLoading(false)
+          return
+        }
+        
+        // ttyd is available, start the session
+        startTerminalSession()
+      } catch {
+        setError('Failed to check ttyd availability')
+        setIsLoading(false)
       }
+    }
+
+    // Check ttyd availability first, then start terminal session
+    checkTtydAndStartSession()
+    
+    // Handle page visibility changes to maintain session
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !terminalUrl) {
+        // Page became visible and we don't have a terminal URL, reconnect
+        startTerminalSession()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    // Cleanup on unmount - but don't terminate the session, just disconnect
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      // Don't call stopTerminalSession here to keep session alive
     }
   }, [])
 
-  const checkTtydAndStart = async () => {
-    try {
-      const checkResponse = await fetch('/api/terminal/check')
-      const checkData = await checkResponse.json()
-      
-      if (!checkData.ttydAvailable) {
-        setError(`ttyd is not installed. Please install it first:\n\n${JSON.stringify(checkData.installInstructions, null, 2)}`)
-        setIsLoading(false)
-        return
-      }
-      
-      // ttyd is available, start the session
-      startTerminalSession()
-    } catch (err) {
-      setError('Failed to check ttyd availability')
-      setIsLoading(false)
-    }
-  }
+
 
   const startTerminalSession = async () => {
     try {
@@ -71,6 +87,12 @@ export default function TerminalPage() {
     try {
       await fetch('/api/terminal/stop', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: sessionInfo?.sessionId,
+        }),
       })
     } catch (err) {
       console.error('Failed to stop terminal session:', err)
@@ -84,16 +106,7 @@ export default function TerminalPage() {
     startTerminalSession()
   }
 
-  const getSessions = async () => {
-    try {
-      const response = await fetch('/api/terminal/sessions')
-      const data = await response.json()
-      return data.sessions || []
-    } catch (err) {
-      console.error('Failed to get sessions:', err)
-      return []
-    }
-  }
+
 
   if (isLoading) {
     return (

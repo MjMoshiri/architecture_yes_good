@@ -14,7 +14,7 @@ export async function GET() {
         manual: 'Visit https://github.com/tsl0922/ttyd for manual installation'
       }
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { 
         error: 'Failed to check ttyd availability',

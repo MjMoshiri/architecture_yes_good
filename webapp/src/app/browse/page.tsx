@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import MobileLayout from '@/components/layout/MobileLayout'
 
 interface DirectoryItem {
   name: string
