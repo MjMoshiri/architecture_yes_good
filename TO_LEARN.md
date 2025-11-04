@@ -9,7 +9,6 @@ This file tracks concepts and topics that have emerged during our discussions an
 
 | Topic | Source | Notes |
 | :--- | :--- | :--- |
-| Saga Pattern | [`two-phase-commit.md`](./concepts/distributed-systems/two-phase-commit.md) | Manages data consistency across microservices in distributed systems. |
 | Idempotency | Suggested | Ensures repeated API requests do not result in duplicate transactions. |
 | ISO 8583 | Suggested | International standard for financial transaction card messages. |
 | Payment Tokenization | Suggested | Replaces sensitive card data with a non-sensitive equivalent token. |
