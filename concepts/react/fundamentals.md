@@ -1,5 +1,5 @@
 ---
-title: "React State Management"
+title: "React Fundamentals"
 tags: [ "react", "state-management", "frontend", "immutability" ]
 prerequisites: []
 status: "draft"
