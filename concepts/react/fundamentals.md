@@ -3,7 +3,7 @@ title: "React Fundamentals"
 tags: [ "react", "state-management", "frontend", "immutability" ]
 prerequisites: []
 status: "draft"
-last_updated: "2025-12-22"
+last_updated: "2025-12-23"
 todos:
   - "Add examples of Context API."
   - "Discuss external state management libraries."
@@ -32,6 +32,24 @@ Effective state management in React relies on understanding how data flows throu
 | **Sorting** | `reverse`, `sort` | Copy the array first (e.g. `[...arr]`), then sort |
 
 *   **Helper Libraries:** Tools like **use-immer** allow you to write "mutable-style" logic (e.g., `draft.push(1)`) on a proxy object, which it then converts into a correct immutable update.
+
+### Structuring State
+*   **Group Related State:** If two state variables always update together, consider merging them into a single object.
+*   **Avoid Contradictions:** Structure state to prevent "impossible" states.
+    *   *Bad:* `const [isSending, setIsSending] = useState(false); const [isSent, setIsSent] = useState(false);` (Both could be true).
+    *   *Good:* `const [status, setStatus] = useState('typing');` (Values: 'typing', 'sending', 'sent').
+*   **Avoid Redundancy:** Do not store data that can be computed from existing props or state.
+    *   *Bad:* `firstName`, `lastName`, `fullName` (Calculate `fullName` during render).
+    *   *Bad:* `items`, `selectedItem` (Store `selectedId` instead to avoid sync issues).
+*   **No Props in State:** Avoid initializing state with props (e.g., `useState(props.val)`) unless you intentionally want to ignore future prop updates.
+*   **Flatten Data:** Deeply nested state objects are hard to update immutably. Flatten them to simplify logic.
+
+### State Preservation
+*   **UI Tree Position:** React preserves state as long as the component is rendered at the same position in the UI tree. It is not tied to the JSX tag or function.
+*   **Resetting State:** You can force a state reset by:
+    *   Rendering a different component at the same position.
+    *   Changing the component's `key` prop.
+*   **Do Not Nest Definitions:** Never define a component function *inside* another component. This creates a new component reference on every render, forcing a remount and state loss for the child.
 
 ### Side Effects
 *   **Event Handlers First:** Whenever possible, put side effects (API calls, logging) in event handlers. They run only when the user interacts.
