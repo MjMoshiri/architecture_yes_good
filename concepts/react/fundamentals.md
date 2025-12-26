@@ -55,6 +55,20 @@ Effective state management in React relies on understanding how data flows throu
 *   **Event Handlers First:** Whenever possible, put side effects (API calls, logging) in event handlers. They run only when the user interacts.
 *   **useEffect as Last Resort:** Use `useEffect` only when the side effect is caused by *rendering* itself (e.g., syncing with an external system) and cannot be handled by an event. It runs after the commit phase.
 
+### Refs
+*   **Generic Concept:** Refs are a generic concept, but most often you'll use them to hold DOM elements.
+*   **Accessing DOM Nodes:** You instruct React to put a DOM node into `myRef.current` by passing `<div ref={myRef}>`.
+*   **Non-Destructive Actions:** Usually, you will use refs for non-destructive actions like focusing, scrolling, or measuring DOM elements.
+*   **Avoid DOM Mutations:** Avoid changing DOM nodes managed by React. If you do modify DOM nodes managed by React, modify parts that React has no reason to update.
+*   **Synchronous Updates:** `flushSync` allows you to force React to synchronously flush updates, bypassing the normal batching behavior. Use sparingly, as it can impact performance.
+
+```tsx
+flushSync(() => {
+  setTodos([ ...todos, newTodo]);
+});
+listRef.current.lastChild.scrollIntoView();
+```
+
 ## Architecture: Trees
 *   **Render Tree:** Represents the hierarchy of components actually rendered to the DOM. This is used to understand the application's UI structure and optimize rendering performance.
 *   **Dependency Tree:** Represents the static module dependencies (imports). This is used by bundlers to tree-shake and optimize the build artifact.
